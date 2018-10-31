@@ -37,6 +37,7 @@ file1 <- read_audio("C:\\workspace\\3. Research\\Hyde\\Kaminoseki\\2_20180331_18
 
 ```{r}
 spectro(file1)
+fspec(file1)
 ```
 
 
