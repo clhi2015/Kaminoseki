@@ -7,24 +7,45 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(bioacoustics)
 ```
 
-## R Markdown
+## Evaluate Data...
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+read the wav file... somehow???
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+# file.choose() to get the file path and name... pasted below...
+read_audio("C:\\workspace\\3. Research\\Hyde\\Kaminoseki\\2_20180331_183200.wav")
+```
+ 
+ 
+ hey marc, I can't figure how to...
+ 
+ below...
+Let's create this as an object...
 
-```{r cars}
-summary(cars)
+```{r}
+file1 <- read_audio("C:\\workspace\\3. Research\\Hyde\\Kaminoseki\\2_20180331_183200.wav")
+
+
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+## Let's do a spectro thingy
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+spectro(file1)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+
+
+
+
+
+
