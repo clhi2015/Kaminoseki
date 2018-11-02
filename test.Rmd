@@ -7,7 +7,11 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tuneR)
 library(bioacoustics)
+library(warbleR)
+library(tools)
+library(randomForest)
 ```
 
 ## Evaluate Data...
@@ -17,6 +21,45 @@ read the wav file... somehow???
 ```{r}
 # file.choose() to get the file path and name... pasted below...
 read_audio("C:\\workspace\\3. Research\\Hyde\\Kaminoseki\\2_20180331_183200.wav")
+
+df1 = quer_xc(qword ='Catharus bicknelli type:call cnt:"United States"', download = FALSE)
+df1 = df1[df1$Vocalization_type=="call",]
+df1 = df1[df1$Quality=="A",]
+df1 = df1[1:9,]
+
+df2 = quer_xc(qword ='Setophaga magnolia type:song cnt:"Canada"', download = FALSE)
+df2 = df2[df2$Quality=="A",]
+df2 = df2[1:9,]
+
+df3 = quer_xc(qword ='Passerella iliaca type:song cnt:"Canada"', download = FALSE)
+df3 = df3[df3$Vocalization_type=="song",]
+df3 = df3[df3$Quality=="A",]
+df3 = df3[1:9,]
+
+df = rbind(df1,df2,df3)
+rm(df1,df2,df3)
+
+# Visualize your data frame
+View(df)
+
+# Download the MP3 files into your data directory
+
+
+quer_xc(X = df, download = TRUE, path = "C:\\workspace\\3. Research\\Hyde\\Kaminoseki")
+
+CATBIC <- read_audio("C:\\workspace\\3. Research\\Hyde\\Kaminoseki\\Catharus-bicknelli-54864.mp3")
+CATBIC
+
+par(mar = c(0, 0, 0, 0), oma = c(0, 0, 0, 0))
+
+# Display with spectro()
+ticks <- c(from = 1000, to = 20000, by = 1000) # frequency tick marks from 1 to 
+                                               # 20 kHz, and steps at each 1 kHz
+temp_slice <- c(from = 1, to = 10) # in seconds
+spectro(CATBIC, tlim = temp_slice, FFT_size = 512, ticks_y = ticks)
+
+
+
 ```
  
  
@@ -28,16 +71,63 @@ Let's create this as an object...
 ```{r}
 file1 <- read_audio("C:\\workspace\\3. Research\\Hyde\\Kaminoseki\\2_20180331_183200.wav")
 
+#checkwavs(file1)
+#file1a <- blob_detection(file1, HPF=1000, time_scale=2)
+```
+
+```{r}
+
+threshold_detection(file1, threshold = 12, channel = "left",   time_exp = 1, min_dur = 140, max_dur = 440, TBE = 300, EDG = 0.996, LPF= 8000, HPF = 2000, FFT_size = 2048, FFT_overlap = 0.875, start_thr = 25, end_thr = 30, SNR_thr = 10, angle_thr = 45, duration_thr = 440, NWS = 1000, KPE = 1e-05, KME = 1e-04, settings = FALSE, acoustic_feat = TRUE,  metadata = FALSE, spectro_dir = NULL, time_scale = 0.1, ticks = TRUE)
+
+blob_detection(file1, channel = "left", time_exp = 1, min_dur = 140, max_dur = 1500, min_area = 40, TBE = 300, EDG = 0.996, LPF = 8000, HPF = 1000, FFT_size = 1024, FFT_overlap = 0.875, blur = 2, bg_substract = 20, contrast_boost = 20, settings = FALSE, acoustic_feat = TRUE, metadata = FALSE, spectro_dir = NULL, time_scale = 0.1, ticks = TRUE)
+
+test.blob = blob_detection(file1, channel = "left", time_exp = 1, min_dur = 140, max_dur = 1500, min_area = 40, TBE = 300, EDG = 0.996, LPF = 8000, HPF = 1000, FFT_size = 1024, FFT_overlap = 0.875, blur = 2, bg_substract = 20, contrast_boost = 20, settings = TRUE, acoustic_feat = TRUE, metadata = FALSE, spectro_dir = "C:\\workspace\\3. Research\\Hyde\\Kaminoseki", time_scale = 2, ticks = TRUE)
+
+test.blob$event_data
+
+test.threshold = threshold_detection(file1, channel = "left", time_exp = 1, min_dur = 140, max_dur = 1500, TBE = 300, EDG = 0.996, LPF = 8000, HPF = 1000, FFT_size = 1024, FFT_overlap = 0.875, start_thr = 10, end_thr = 30, SNR_thr = 8, angle_thr = 125, duration_thr = 250, NWS = 10, KPE = 1e-05, KME = 1e-04, settings = FALSE, acoustic_feat = TRUE, metadata = FALSE, spectro_dir = "C:\\workspace\\3. Research\\Hyde\\Kaminoseki", time_scale = 2, ticks = TRUE)
+                           
+#blur = 2, bg_substract = 20, contrast_boost = 20, settings = TRUE, acoustic_feat = TRUE, metadata = FALSE, spectro_dir = "C:\\workspace\\3. Research\\Hyde\\Kaminoseki", time_scale = 2, ticks = TRUE)
+
 
 
 ```
 
 
-## Let's do a spectro thingy
+let's create a spectrogram with the file... and search for a section..
 
 ```{r}
-spectro(file1)
-fspec(file1)
+par(mar=c(0,0,0,0), oma = c(0,0,0,0))
+ticks = c(from = 10, to=50, by=10)
+limits = c(from = 1000, to = 10000)
+limits = NULL
+
+temp_slice = c(from = 13, to = 15)
+
+spectro(file1, tlim = temp_slice, FFT_size=2048, ticks_y= ticks, flim=limits)
+spectro(file1, tlim = temp_slice, FFT_size=256, ticks_y= ticks, LPF=10000, HPF=1000, SNR_thr=0)
+
+```
+
+
+
+```{r}
+file1b <- threshold_detection(file1, HPF=1000, time_scale=2, end_thr=30)
+read_wav(file1, time_exp=1, from=300, to =420)
+read_wav(file1a), time_exp=1, from=300, to=420)
+                              
+                              
+
+```
+
+
+## Creating a Spectogram
+
+I think we need to subset the data where the birds are actually singing... 
+
+```{r}
+spectro(file1, tlim=c(300, 420))
+# fspec(file1)
 ```
 
 
